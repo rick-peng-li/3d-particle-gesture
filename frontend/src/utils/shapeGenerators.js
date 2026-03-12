@@ -344,7 +344,146 @@ export function getMaitreyaPoints(count) {
   }
   return points;
 }
+export function getChristmasTreePoints(count) {
+  const points = [];
+  
+  // 分配粒子数量：树冠占大部分，树干、装饰球、正方体、糖果棍占小部分
+  const treeCrownCount = Math.floor(count * 0.6); // 树冠
+  const trunkCount = Math.floor(count * 0.1);    // 树干
+  const ornamentBallCount = Math.floor(count * 0.15); // 装饰球
+  const ornamentCubeCount = Math.floor(count * 0.1);  // 装饰正方体
+  const candyCaneCount = count - treeCrownCount - trunkCount - ornamentBallCount - ornamentCubeCount; // 糖果棍
+  
+  // 1. 生成树冠（多层圆锥体）
+  const layers = [
+    { y: 0, radius: 20, height: 15 },   // 底层
+    { y: 12, radius: 15, height: 12 },  // 中层
+    { y: 22, radius: 10, height: 10 },  // 上层
+    { y: 30, radius: 5, height: 8 },    // 顶层
+  ];
+  
+  for (let i = 0; i < treeCrownCount; i++) {
+    // 随机选择一层
+    const layer = layers[Math.floor(Math.random() * layers.length)];
+    // 在圆锥体内随机生成点
+    const t = Math.random(); // 0 到 1，从底部到顶部
+    const y = layer.y + t * layer.height;
+    const radiusAtHeight = layer.radius * (1 - t * 0.8); // 越往上半径越小
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(Math.random()) * radiusAtHeight; // 均匀分布在圆内
+    
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    
+    points.push(x, y, z);
+  }
+  
+  // 2. 生成树干（圆柱体）
+  for (let i = 0; i < trunkCount; i++) {
+    const y = -10 + Math.random() * 12; // 从-10到2，在树冠下方
+    const angle = Math.random() * Math.PI * 2;
+    const r = 3 + Math.random() * 2; // 半径3-5
+    
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    
+    points.push(x, y, z);
+  }
+  
+  // 3. 生成装饰球（散布在树冠上的小球）
+  const ballColors = ['#ff0000', '#ffd700', '#00ff00', '#0000ff']; // 红、金、绿、蓝
+  for (let i = 0; i < ornamentBallCount; i++) {
+    // 随机在树冠区域内选择位置
+    const layer = layers[Math.floor(Math.random() * layers.length)];
+    const t = 0.2 + Math.random() * 0.6; // 主要分布在中下部
+    const y = layer.y + t * layer.height;
+    const radiusAtHeight = layer.radius * (1 - t * 0.8);
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.random() * radiusAtHeight;
+    
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    
+    // 添加一些偏移，让球看起来是挂在外面的
+    const offset = 1.5;
+    points.push(
+      x + (x > 0 ? offset : -offset) * 0.3,
+      y,
+      z + (z > 0 ? offset : -offset) * 0.3
+    );
+  }
+  
+  // 4. 生成装饰正方体（散布在树冠上的小方块）
+  for (let i = 0; i < ornamentCubeCount; i++) {
+    const layer = layers[Math.floor(Math.random() * layers.length)];
+    const t = 0.3 + Math.random() * 0.5;
+    const y = layer.y + t * layer.height;
+    const radiusAtHeight = layer.radius * (1 - t * 0.8);
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.random() * radiusAtHeight;
+    
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    
+    // 正方体稍微突出一点
+    const offset = 1;
+    points.push(
+      x + (x > 0 ? offset : -offset) * 0.2,
+      y + 0.5,
+      z + (z > 0 ? offset : -offset) * 0.2
+    );
+  }
+  
+  // 5. 生成糖果棍（螺旋形，主要在树冠外层）
+  for (let i = 0; i < candyCaneCount; i++) {
+    // 螺旋参数
+    const turns = 3; // 螺旋圈数
+    const height = 15; // 高度
+    const startY = 5; // 起始高度
+    const angle = Math.random() * Math.PI * 2;
+    const t = Math.random();
+    const y = startY + t * height;
+    const radius = 18 - t * 12; // 越往上半径越小
+    const spiralAngle = angle + t * turns * Math.PI * 2;
+    
+    const x = radius * Math.cos(spiralAngle);
+    const z = radius * Math.sin(spiralAngle);
+    
+    // 稍微偏离螺旋线，增加自然感
+    const jitter = (Math.random() - 0.5) * 2;
+    points.push(x + jitter, y + jitter * 0.5, z + jitter);
+  }
+  
+  // 树顶星星（用一个小的星形点集）
+  const starCount = 50;
+  const starY = 40;
+  const starRadius = 4;
+  for (let i = 0; i < starCount && points.length < count * 3; i++) {
+    const angle = (i / starCount) * Math.PI * 2 * 5; // 5角星
+    const r = starRadius * (0.5 + 0.5 * Math.abs(Math.sin(angle * 5)));
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    points.push(x, starY + (Math.random() - 0.5) * 2, z);
+  }
+  
+  // 如果粒子数不够，补充一些随机点
+  while (points.length < count * 3) {
+    const layer = layers[Math.floor(Math.random() * layers.length)];
+    const t = Math.random();
+    const y = layer.y + t * layer.height;
+    const radiusAtHeight = layer.radius * (1 - t * 0.8);
+    const angle = Math.random() * Math.PI * 2;
+    const r = Math.sqrt(Math.random()) * radiusAtHeight;
+    
+    points.push(r * Math.cos(angle), y, r * Math.sin(angle));
+  }
+  
+  // 确保返回的粒子数正好是count*3
+  return points.slice(0, count * 3);
+}
+
 export const shapeGenerators = {
+  christmasTree: getChristmasTreePoints,
   heart: getHeartPoints,
   flower: getFlowerPoints,
   saturn: getSaturnPoints,
