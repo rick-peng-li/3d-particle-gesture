@@ -1,5 +1,121 @@
 // Shape Generators for 3D Particles
 
+// Christmas Tree Generator
+export function getChristmasTreePoints(count) {
+  const points = [];
+  
+  // Distribution: tree body 50%, trunk 8%, ornaments 25%, candy canes 12%, star 5%
+  const treeCount = Math.floor(count * 0.50);
+  const trunkCount = Math.floor(count * 0.08);
+  const ornamentCount = Math.floor(count * 0.25);
+  const candyCount = Math.floor(count * 0.12);
+  const starCount = count - treeCount - trunkCount - ornamentCount - candyCount;
+  
+  // Helper: random point in sphere
+  const randomInSphere = (cx, cy, cz, r) => {
+    const u = Math.random();
+    const v = Math.random();
+    const theta = 2 * Math.PI * u;
+    const phi = Math.acos(2 * v - 1);
+    const rad = r * Math.cbrt(Math.random());
+    return [
+      cx + rad * Math.sin(phi) * Math.cos(theta),
+      cy + rad * Math.sin(phi) * Math.sin(theta),
+      cz + rad * Math.cos(phi)
+    ];
+  };
+  
+  // Helper: random point in cube
+  const randomInCube = (cx, cy, cz, sx, sy, sz) => {
+    return [
+      cx + (Math.random() - 0.5) * sx,
+      cy + (Math.random() - 0.5) * sy,
+      cz + (Math.random() - 0.5) * sz
+    ];
+  };
+  
+  // 1. Christmas Tree Body (Cone shape)
+  for (let i = 0; i < treeCount; i++) {
+    const h = Math.random(); // 0 at bottom, 1 at top
+    const y = -8 + h * 32; // y from -8 to 24
+    const radius = 18 * (1 - h * 0.9); // Radius decreases going up
+    const angle = Math.random() * 2 * Math.PI;
+    const r = Math.sqrt(Math.random()) * radius;
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    points.push(x, y, z);
+  }
+  
+  // 2. Tree Trunk (Cylinder/Cube)
+  for (let i = 0; i < trunkCount; i++) {
+    const [x, y, z] = randomInCube(0, -12, 0, 6, 8, 6);
+    points.push(x, y, z);
+  }
+  
+  // 3. Ornament Balls (Spheres on tree)
+  const ornamentPositions = [
+    { x: -8, y: 0, z: 5, r: 2.5 },
+    { x: 6, y: 5, z: -4, r: 2 },
+    { x: -5, y: 10, z: 3, r: 2 },
+    { x: 4, y: 15, z: 2, r: 1.8 },
+    { x: -3, y: 18, z: -2, r: 1.5 },
+    { x: 2, y: -3, z: 6, r: 2.2 },
+    { x: -6, y: 8, z: -5, r: 1.8 },
+    { x: 5, y: 12, z: 4, r: 1.5 },
+  ];
+  
+  const pointsPerOrnament = Math.floor(ornamentCount / ornamentPositions.length);
+  for (const orn of ornamentPositions) {
+    for (let i = 0; i < pointsPerOrnament; i++) {
+      const [x, y, z] = randomInSphere(orn.x, orn.y, orn.z, orn.r);
+      points.push(x, y, z);
+    }
+  }
+  
+  // 4. Candy Canes
+  const drawCandyCane = (startX, startY, startZ, length, bendRatio) => {
+    const candyPoints = [];
+    const segments = Math.floor(candyCount / 2);
+    for (let i = 0; i < segments; i++) {
+      const t = i / segments;
+      let x = startX;
+      let y = startY + t * length;
+      let z = startZ;
+      // Bend at top
+      if (t > bendRatio) {
+        const bendT = (t - bendRatio) / (1 - bendRatio);
+        x += Math.sin(bendT * Math.PI * 0.5) * 4;
+        y = startY + bendRatio * length + bendT * 5;
+      }
+      // Add thickness
+      const thick = 0.5;
+      candyPoints.push(
+        x + (Math.random() - 0.5) * thick,
+        y + (Math.random() - 0.5) * thick,
+        z + (Math.random() - 0.5) * thick
+      );
+    }
+    return candyPoints;
+  };
+  
+  // Two candy canes
+  const cane1 = drawCandyCane(-12, -5, 8, 18, 0.75);
+  const cane2 = drawCandyCane(10, -3, -6, 15, 0.8);
+  points.push(...cane1, ...cane2);
+  
+  // 5. Star on top
+  for (let i = 0; i < starCount; i++) {
+    const angle = (i / starCount) * Math.PI * 2 * 5; // 5 points
+    const r = 4 * (0.5 + 0.5 * Math.abs(Math.sin(angle / 2.5))); // Alternating radius
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    const y = 26 + (Math.random() - 0.5) * 2;
+    points.push(x, y, z);
+  }
+  
+  return points;
+}
+
 export function getSpherePoints(count) {
   const points = [];
   for (let i = 0; i < count; i++) {
@@ -345,6 +461,7 @@ export function getMaitreyaPoints(count) {
   return points;
 }
 export const shapeGenerators = {
+  christmasTree: getChristmasTreePoints,
   heart: getHeartPoints,
   flower: getFlowerPoints,
   saturn: getSaturnPoints,
