@@ -171,6 +171,100 @@ export function getFireworkPoints(count) {
   return points;
 }
 
+export function getChristmasTreePoints(count) {
+  const points = [];
+  
+  // 分配粒子数量
+  const treeCount = Math.floor(count * 0.6);      // 圣诞树主体
+  const ornamentCount = Math.floor(count * 0.25); // 装饰球
+  const cubeCount = Math.floor(count * 0.1);      // 正方体礼物盒
+  const candyCount = count - treeCount - ornamentCount - cubeCount; // 糖果棍
+  
+  // 1. 圣诞树主体（三层圆锥）
+  const treeLayers = [
+    { yBase: -15, height: 12, maxRadius: 18 },  // 底层
+    { yBase: -3, height: 10, maxRadius: 12 },   // 中层
+    { yBase: 7, height: 8, maxRadius: 6 },      // 顶层
+  ];
+  
+  for (let i = 0; i < treeCount; i++) {
+    // 随机选择一层
+    const layer = treeLayers[Math.floor(Math.random() * treeLayers.length)];
+    const t = Math.random(); // 0 = bottom, 1 = top of layer
+    
+    // 圆锥形状：y越高，半径越小
+    const y = layer.yBase + t * layer.height;
+    const radiusAtY = layer.maxRadius * (1 - t * 0.8);
+    
+    // 在圆内随机分布
+    const r = radiusAtY * Math.sqrt(Math.random());
+    const angle = Math.random() * 2 * Math.PI;
+    const x = r * Math.cos(angle);
+    const z = r * Math.sin(angle);
+    
+    points.push(x, y, z);
+  }
+  
+  // 2. 装饰球（球体）
+  const ornamentPositions = [
+    { x: -8, y: -5, z: 8, r: 2 },
+    { x: 8, y: -8, z: 6, r: 2.5 },
+    { x: 0, y: 0, z: 10, r: 2 },
+    { x: -5, y: 8, z: 5, r: 1.8 },
+    { x: 5, y: 5, z: 7, r: 2 },
+    { x: 0, y: 12, z: 4, r: 1.5 },
+  ];
+  
+  for (let i = 0; i < ornamentCount; i++) {
+    const pos = ornamentPositions[i % ornamentPositions.length];
+    // 球内随机点
+    const r = pos.r * Math.cbrt(Math.random());
+    const theta = Math.random() * 2 * Math.PI;
+    const phi = Math.acos(2 * Math.random() - 1);
+    const x = pos.x + r * Math.sin(phi) * Math.cos(theta);
+    const y = pos.y + r * Math.sin(phi) * Math.sin(theta);
+    const z = pos.z + r * Math.cos(phi);
+    points.push(x, y, z);
+  }
+  
+  // 3. 正方体礼物盒
+  const cubePositions = [
+    { x: -12, y: -18, z: 5, size: 4 },
+    { x: 12, y: -18, z: 3, size: 3.5 },
+    { x: -8, y: -18, z: -5, size: 3 },
+    { x: 10, y: -18, z: -3, size: 3.5 },
+  ];
+  
+  for (let i = 0; i < cubeCount; i++) {
+    const pos = cubePositions[i % cubePositions.length];
+    const half = pos.size / 2;
+    const x = pos.x + (Math.random() - 0.5) * pos.size;
+    const y = pos.y + (Math.random() - 0.5) * pos.size;
+    const z = pos.z + (Math.random() - 0.5) * pos.size;
+    points.push(x, y, z);
+  }
+  
+  // 4. 糖果棍（圆柱形条纹）
+  const candyPositions = [
+    { x: -15, y: -5, z: 0, r: 1.5, h: 8 },
+    { x: 15, y: -3, z: 2, r: 1.5, h: 8 },
+    { x: -13, y: 5, z: -2, r: 1.2, h: 6 },
+  ];
+  
+  for (let i = 0; i < candyCount; i++) {
+    const pos = candyPositions[i % candyPositions.length];
+    const angle = Math.random() * 2 * Math.PI;
+    const r = pos.r * Math.sqrt(Math.random());
+    const h = (Math.random() - 0.5) * pos.h;
+    const x = pos.x + r * Math.cos(angle);
+    const y = pos.y + h;
+    const z = pos.z + r * Math.sin(angle);
+    points.push(x, y, z);
+  }
+  
+  return points;
+}
+
 // Function to process image data into points
 export function getImagePoints(imageData, count) {
   const points = [];
@@ -345,6 +439,7 @@ export function getMaitreyaPoints(count) {
   return points;
 }
 export const shapeGenerators = {
+  christmastree: getChristmasTreePoints,
   heart: getHeartPoints,
   flower: getFlowerPoints,
   saturn: getSaturnPoints,
