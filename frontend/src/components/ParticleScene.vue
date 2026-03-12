@@ -7,10 +7,11 @@ import '../styles/ParticleScene.css';
 
 const container = ref(null);
 const particleCount = 5000;
-const currentShape = ref('heart');
+const currentShape = ref('christmasTree');
 const particleColor = ref('#ff0055');
 
 const shapeLabels = {
+  christmasTree: '圣诞树',
   heart: '爱心',
   flower: '花朵',
   saturn: '土星',
