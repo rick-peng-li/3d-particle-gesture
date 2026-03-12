@@ -11,6 +11,7 @@ const currentShape = ref('heart');
 const particleColor = ref('#ff0055');
 
 const shapeLabels = {
+  christmasTree: '圣诞树',
   heart: '爱心',
   flower: '花朵',
   saturn: '土星',
