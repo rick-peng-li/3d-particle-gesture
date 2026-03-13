@@ -6,7 +6,8 @@ export function useMediaPipe() {
   const loading = ref(true);
   const trackingStatus = ref('正在初始化...');
   const isAggregated = ref(true);
-  const opennessScale = ref(0.0); // Default to 0 (fully aggregated)
+  const opennessScale = ref(0.0);
+  const fingerCount = ref(0);
   let handLandmarker = null;
   let lastVideoTime = -1;
 
@@ -71,12 +72,16 @@ export function useMediaPipe() {
 
             if (scaleRef > 0) {
                 // Check 4 fingers: Index(8), Middle(12), Ring(16), Pinky(20)
+                // PIP joints for better finger extension detection
                 const fingerTips = [8, 12, 16, 20];
+                const fingerPIPs = [6, 10, 14, 18];
                 let extendedCount = 0;
                 let currentHandOpenness = 0;
 
-                fingerTips.forEach(tipIdx => {
+                fingerTips.forEach((tipIdx, fi) => {
                     const tip = landmarks[tipIdx];
+                    const pip = landmarks[fingerPIPs[fi]];
+                    
                     const distToWrist = Math.sqrt(
                         Math.pow(tip.x - wrist.x, 2) + 
                         Math.pow(tip.y - wrist.y, 2)
@@ -86,11 +91,16 @@ export function useMediaPipe() {
                     const ratio = distToWrist / scaleRef;
                     currentHandOpenness += ratio;
 
-                    // Threshold for "extended" finger
-                    if (ratio > 1.6) {
+                    // Threshold for "extended" finger - tip must be above PIP (extended)
+                    if (ratio > 1.6 && tip.y < pip.y) {
                         extendedCount++;
                     }
                 });
+                
+                // Update finger count if more fingers detected
+                if (extendedCount > fingerCount.value) {
+                    fingerCount.value = extendedCount;
+                }
                 
                 // Average openness for this hand
                 currentHandOpenness /= 4;
@@ -153,6 +163,7 @@ export function useMediaPipe() {
            isAggregated.value = true;
            trackingStatus.value = "未检测到手势";
            opennessScale.value = 0.0;
+           fingerCount.value = 0;
        }
      }
    }
@@ -169,6 +180,7 @@ export function useMediaPipe() {
     trackingStatus,
     isAggregated,
     opennessScale,
+    fingerCount,
     initMediaPipe,
     detectGesture
   };

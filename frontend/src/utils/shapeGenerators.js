@@ -344,10 +344,86 @@ export function getMaitreyaPoints(count) {
   }
   return points;
 }
+export function getLetterAPoints(count) {
+  const points = [];
+  const segments = [
+    { x1: -10, y1: 15, x2: 0, y2: -15 },
+    { x1: 0, y1: -15, x2: 10, y2: 15 },
+    { x1: -6, y1: 5, x2: 6, y2: 5 }
+  ];
+  
+  const perSegment = Math.floor(count / segments.length);
+  const remainder = count % segments.length;
+  
+  segments.forEach((seg, si) => {
+    const segCount = perSegment + (si < remainder ? 1 : 0);
+    for (let i = 0; i < segCount; i++) {
+      const t = Math.random();
+      const x = seg.x1 + (seg.x2 - seg.x1) * t + (Math.random() - 0.5) * 2;
+      const y = seg.y1 + (seg.y2 - seg.y1) * t + (Math.random() - 0.5) * 2;
+      const z = (Math.random() - 0.5) * 3;
+      points.push(x, y, z);
+    }
+  });
+  
+  return points;
+}
+
+export function getLetterBPoints(count) {
+  const points = [];
+  const segments = [
+    { x1: -8, y1: -15, x2: -8, y2: 15 },
+    { x1: -8, y1: -15, x2: 4, y2: -15 },
+    { x1: 4, y1: -15, x2: 8, y2: -10 },
+    { x1: 8, y1: -10, x2: 4, y2: -5 },
+    { x1: 4, y1: -5, x2: -8, y2: -5 },
+    { x1: -8, y1: -5, x2: 6, y2: -5 },
+    { x1: 6, y1: -5, x2: 10, y2: 2 },
+    { x1: 10, y1: 2, x2: 6, y2: 10 },
+    { x1: 6, y1: 10, x2: -8, y2: 10 },
+    { x1: -8, y1: 10, x2: -8, y2: 15 },
+    { x1: -8, y1: 15, x2: 6, y2: 15 }
+  ];
+  
+  const perSegment = Math.floor(count / segments.length);
+  const remainder = count % segments.length;
+  
+  segments.forEach((seg, si) => {
+    const segCount = perSegment + (si < remainder ? 1 : 0);
+    for (let i = 0; i < segCount; i++) {
+      const t = Math.random();
+      const x = seg.x1 + (seg.x2 - seg.x1) * t + (Math.random() - 0.5) * 2;
+      const y = seg.y1 + (seg.y2 - seg.y1) * t + (Math.random() - 0.5) * 2;
+      const z = (Math.random() - 0.5) * 3;
+      points.push(x, y, z);
+    }
+  });
+  
+  return points;
+}
+
+export function getLetterCPoints(count) {
+  const points = [];
+  
+  for (let i = 0; i < count; i++) {
+    const angle = Math.PI * 0.2 + Math.random() * Math.PI * 1.6;
+    const r = 12 + (Math.random() - 0.5) * 3;
+    const x = r * Math.cos(angle);
+    const y = r * Math.sin(angle);
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x, y, z);
+  }
+  
+  return points;
+}
+
 export const shapeGenerators = {
   heart: getHeartPoints,
   flower: getFlowerPoints,
   saturn: getSaturnPoints,
   buddha: getBuddhaPoints,
   firework: getFireworkPoints,
+  letterA: getLetterAPoints,
+  letterB: getLetterBPoints,
+  letterC: getLetterCPoints,
 };
