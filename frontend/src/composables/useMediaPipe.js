@@ -7,6 +7,7 @@ export function useMediaPipe() {
   const trackingStatus = ref('正在初始化...');
   const isAggregated = ref(true);
   const opennessScale = ref(0.0); // Default to 0 (fully aggregated)
+  const gestureType = ref('closed'); // closed, 1finger, 2fingers, 3fingers, open
   let handLandmarker = null;
   let lastVideoTime = -1;
 
@@ -55,9 +56,9 @@ export function useMediaPipe() {
       let results = handLandmarker.detectForVideo(videoElement.value, now);
       
       if (results.landmarks && results.landmarks.length > 0) {
-          // Check ALL detected hands. If ANY hand is open, trigger diffusion.
+          // Check ALL detected hands. We'll take the hand with the most extended fingers
           let maxOpenness = 0;
-          let anyHandOpen = false;
+          let maxExtendedCount = 0;
 
           for (const landmarks of results.landmarks) {
             const wrist = landmarks[0];
@@ -98,9 +99,9 @@ export function useMediaPipe() {
                     maxOpenness = currentHandOpenness;
                 }
 
-                // If at least 4 fingers extended, this hand is "Open"
-                if (extendedCount >= 4) {
-                    anyHandOpen = true;
+                // Track the maximum extended fingers across all hands
+                if (extendedCount > maxExtendedCount) {
+                    maxExtendedCount = extendedCount;
                 }
             }
           }
@@ -130,12 +131,30 @@ export function useMediaPipe() {
           // 0 = Target Shape, 1 = Explosion
           // Note: isAggregated boolean is now less important for logic, mainly for UI text
           
-          if (maxOpenness > openThreshold) {
+          // Determine gesture type based on extended finger count
+          if (maxExtendedCount >= 4) {
                isAggregated.value = false;
+               gestureType.value = 'open';
                trackingStatus.value = "手掌张开 (粒子扩散)";
+          } else if (maxExtendedCount === 3) {
+               isAggregated.value = true;
+               gestureType.value = '3fingers';
+               trackingStatus.value = "3根手指 (模型C)";
+               opennessScale.value = 0.0;
+          } else if (maxExtendedCount === 2) {
+               isAggregated.value = true;
+               gestureType.value = '2fingers';
+               trackingStatus.value = "2根手指 (模型B)";
+               opennessScale.value = 0.0;
+          } else if (maxExtendedCount === 1) {
+               isAggregated.value = true;
+               gestureType.value = '1finger';
+               trackingStatus.value = "1根手指 (模型A)";
+               opennessScale.value = 0.0;
           } else {
                 isAggregated.value = true;
-                trackingStatus.value = "握拳/其他 (粒子聚合)";
+                gestureType.value = 'closed';
+                trackingStatus.value = "握拳 (默认形状)";
                 opennessScale.value = 0.0;
            }
            
@@ -146,11 +165,14 @@ export function useMediaPipe() {
           // Or keep using it as multiplier? Let's use it as 'explosion force'.
           // 0 force = aggregate. >0 force = diffuse.
           
-          opennessScale.value = scaleFactor; 
+          if (gestureType.value === 'open') {
+              opennessScale.value = scaleFactor; 
+          }
           
       } else {
            // No hand detected -> Default
            isAggregated.value = true;
+           gestureType.value = 'closed';
            trackingStatus.value = "未检测到手势";
            opennessScale.value = 0.0;
        }
@@ -169,6 +191,7 @@ export function useMediaPipe() {
     trackingStatus,
     isAggregated,
     opennessScale,
+    gestureType,
     initMediaPipe,
     detectGesture
   };
