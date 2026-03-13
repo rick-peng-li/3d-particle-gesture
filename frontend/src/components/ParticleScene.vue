@@ -26,6 +26,7 @@ const {
   trackingStatus, 
   isAggregated, 
   opennessScale,
+  fingerCount,
   initMediaPipe, 
   detectGesture 
 } = useMediaPipe();
@@ -67,8 +68,20 @@ watch(currentShape, (newVal) => {
     if (newVal !== 'custom') {
       updateTargetShape(newVal);
     } 
-    // For 'custom', we handle the update manually in confirmDrawing or handleFileUpload
-    // to avoid reopening the modal or clearing the shape.
+  });
+
+  const fingerLetterMap = {
+    1: 'letterA',
+    2: 'letterB',
+    3: 'letterC'
+  };
+
+  watch(fingerCount, (count) => {
+    if (count >= 1 && count <= 3) {
+      updateTargetShape(fingerLetterMap[count]);
+    } else {
+      updateTargetShape(currentShape.value);
+    }
   });
 
 onMounted(async () => {
@@ -87,6 +100,9 @@ onMounted(async () => {
   <div class="ui-panel">
     <h1>3D 手势粒子交互</h1>
     <div class="status">{{ trackingStatus }}</div>
+    <div class="finger-count" v-if="fingerCount > 0 && fingerCount <= 3">
+      检测到 {{ fingerCount }} 根手指 → 字母: {{ ['A', 'B', 'C'][fingerCount - 1] }}
+    </div>
     
     <div class="controls">
       <div class="control-group">
