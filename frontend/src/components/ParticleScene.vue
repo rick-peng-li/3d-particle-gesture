@@ -26,6 +26,7 @@ const {
   trackingStatus, 
   isAggregated, 
   opennessScale,
+  gestureType,
   initMediaPipe, 
   detectGesture 
 } = useMediaPipe();
@@ -33,7 +34,8 @@ const {
 const { 
   initThree, 
   animate, 
-  updateTargetShape 
+  updateTargetShape,
+  updateDeformation 
 } = useThreeParticles(
   container, 
   particleCount, 
@@ -69,6 +71,27 @@ watch(currentShape, (newVal) => {
     } 
     // For 'custom', we handle the update manually in confirmDrawing or handleFileUpload
     // to avoid reopening the modal or clearing the shape.
+  });
+
+// Watch gesture type changes to deform particle shape
+watch(gestureType, (newGesture) => {
+    // 根据手势类型应用不同的变形
+    switch(newGesture) {
+      case '1finger':
+        updateDeformation('letterA'); // 1根手指 - 变形为字母A
+        break;
+      case '2fingers':
+        updateDeformation('letterB'); // 2根手指 - 变形为字母B
+        break;
+      case '3fingers':
+        updateDeformation('letterC'); // 3根手指 - 变形为字母C
+        break;
+      case 'closed':
+      case 'open':
+      default:
+        updateDeformation('none'); // 握拳或张开手掌 - 恢复默认形状
+        break;
+    }
   });
 
 onMounted(async () => {

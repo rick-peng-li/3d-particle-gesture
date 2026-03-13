@@ -344,10 +344,175 @@ export function getMaitreyaPoints(count) {
   }
   return points;
 }
+// Letter A shape generator
+export function getLetterAPoints(count) {
+  const points = [];
+  // Letter A is composed of:
+  // 1. Left diagonal stroke
+  // 2. Right diagonal stroke
+  // 3. Crossbar
+  // 4. Filling the interior
+  
+  const leftStrokeCount = Math.floor(count * 0.25);
+  const rightStrokeCount = Math.floor(count * 0.25);
+  const crossbarCount = Math.floor(count * 0.15);
+  const fillCount = count - leftStrokeCount - rightStrokeCount - crossbarCount;
+  
+  // Left diagonal stroke (from bottom-left to top)
+  for (let i = 0; i < leftStrokeCount; i++) {
+    const t = i / leftStrokeCount; // 0 to 1
+    const x = -15 + t * 7.5; // from -15 to -7.5
+    const y = -20 + t * 40; // from -20 to 20
+    const z = (Math.random() - 0.5) * 3;
+    // Add some thickness
+    const jitterX = (Math.random() - 0.5) * 2;
+    const jitterY = (Math.random() - 0.5) * 2;
+    points.push(x + jitterX, y + jitterY, z);
+  }
+  
+  // Right diagonal stroke (from bottom-right to top)
+  for (let i = 0; i < rightStrokeCount; i++) {
+    const t = i / rightStrokeCount; // 0 to 1
+    const x = 15 - t * 7.5; // from 15 to 7.5
+    const y = -20 + t * 40; // from -20 to 20
+    const z = (Math.random() - 0.5) * 3;
+    // Add some thickness
+    const jitterX = (Math.random() - 0.5) * 2;
+    const jitterY = (Math.random() - 0.5) * 2;
+    points.push(x + jitterX, y + jitterY, z);
+  }
+  
+  // Crossbar (middle horizontal line)
+  for (let i = 0; i < crossbarCount; i++) {
+    const t = i / crossbarCount; // 0 to 1
+    const x = -8 + t * 16; // from -8 to 8
+    const y = 0; // middle height
+    const z = (Math.random() - 0.5) * 3;
+    // Add some thickness
+    const jitterX = (Math.random() - 0.5) * 1;
+    const jitterY = (Math.random() - 0.5) * 1.5;
+    points.push(x + jitterX, y + jitterY, z);
+  }
+  
+  // Fill the interior (above crossbar)
+  for (let i = 0; i < fillCount; i++) {
+    // Random point inside the A shape
+    const y = Math.random() * 35 - 15; // from -15 to 20
+    // Width varies with height
+    const maxWidth = y < 0 ? 12 : (20 - y) * 0.75;
+    const x = (Math.random() - 0.5) * 2 * maxWidth;
+    const z = (Math.random() - 0.5) * 5;
+    
+    // Only keep points inside the A shape
+    if (y < 0 || Math.abs(x) < (20 - y) * 0.75) {
+      points.push(x, y, z);
+    } else {
+      // If outside, add to crossbar area
+      points.push((Math.random() - 0.5) * 16, (Math.random() - 0.5) * 3, (Math.random() - 0.5) * 3);
+    }
+  }
+  
+  return points;
+}
+
+// Letter B shape generator
+export function getLetterBPoints(count) {
+  const points = [];
+  // Letter B is composed of:
+  // 1. Left vertical stem
+  // 2. Top loop
+  // 3. Bottom loop
+  
+  const stemCount = Math.floor(count * 0.2);
+  const topLoopCount = Math.floor(count * 0.35);
+  const bottomLoopCount = count - stemCount - topLoopCount;
+  
+  // Left vertical stem
+  for (let i = 0; i < stemCount; i++) {
+    const t = i / stemCount; // 0 to 1
+    const x = -12;
+    const y = -20 + t * 40; // from -20 to 20
+    const z = (Math.random() - 0.5) * 3;
+    // Add some thickness
+    const jitterX = (Math.random() - 0.5) * 2;
+    const jitterY = (Math.random() - 0.5) * 1;
+    points.push(x + jitterX, y + jitterY, z);
+  }
+  
+  // Top loop (upper half)
+  for (let i = 0; i < topLoopCount; i++) {
+    const angle = Math.random() * Math.PI; // 0 to π (right half-circle)
+    const radius = 10 + Math.random() * 3;
+    const x = radius * Math.cos(angle);
+    const y = 10 + radius * Math.sin(angle) * 0.8;
+    const z = (Math.random() - 0.5) * 4;
+    points.push(x, y, z);
+  }
+  
+  // Bottom loop (lower half)
+  for (let i = 0; i < bottomLoopCount; i++) {
+    const angle = Math.random() * Math.PI; // 0 to π (right half-circle)
+    const radius = 12 + Math.random() * 3;
+    const x = radius * Math.cos(angle);
+    const y = -10 - radius * Math.sin(angle) * 0.8;
+    const z = (Math.random() - 0.5) * 4;
+    points.push(x, y, z);
+  }
+  
+  return points;
+}
+
+// Letter C shape generator
+export function getLetterCPoints(count) {
+  const points = [];
+  // Letter C is a partial circle (left side open)
+  
+  const outerCount = Math.floor(count * 0.4);
+  const innerCount = Math.floor(count * 0.3);
+  const fillCount = count - outerCount - innerCount;
+  
+  // Outer arc (larger radius)
+  for (let i = 0; i < outerCount; i++) {
+    // Angle from ~60 degrees to ~300 degrees (missing right side)
+    const angle = (Math.PI / 3) + Math.random() * (4 * Math.PI / 3);
+    const radius = 18 + Math.random() * 3;
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x, y, z);
+  }
+  
+  // Inner arc (smaller radius)
+  for (let i = 0; i < innerCount; i++) {
+    // Angle from ~60 degrees to ~300 degrees
+    const angle = (Math.PI / 3) + Math.random() * (4 * Math.PI / 3);
+    const radius = 10 + Math.random() * 3;
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x, y, z);
+  }
+  
+  // Fill between inner and outer arcs
+  for (let i = 0; i < fillCount; i++) {
+    const angle = (Math.PI / 3) + Math.random() * (4 * Math.PI / 3);
+    const radius = 10 + Math.random() * 11; // between inner and outer
+    const x = radius * Math.cos(angle);
+    const y = radius * Math.sin(angle);
+    const z = (Math.random() - 0.5) * 5;
+    points.push(x, y, z);
+  }
+  
+  return points;
+}
+
 export const shapeGenerators = {
   heart: getHeartPoints,
   flower: getFlowerPoints,
   saturn: getSaturnPoints,
   buddha: getBuddhaPoints,
   firework: getFireworkPoints,
+  letterA: getLetterAPoints,
+  letterB: getLetterBPoints,
+  letterC: getLetterCPoints,
 };
