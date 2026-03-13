@@ -20,27 +20,32 @@ const shapeLabels = {
 };
 
 // Use Composables
-const { 
-  videoElement, 
-  loading, 
-  trackingStatus, 
-  isAggregated, 
+const {
+  videoElement,
+  loading,
+  trackingStatus,
+  isAggregated,
   opennessScale,
-  initMediaPipe, 
-  detectGesture 
+  fingerCount,
+  letterMode,
+  initMediaPipe,
+  detectGesture
 } = useMediaPipe();
 
-const { 
-  initThree, 
-  animate, 
-  updateTargetShape 
+const {
+  initThree,
+  animate,
+  updateTargetShape,
+  currentShapeName
 } = useThreeParticles(
-  container, 
-  particleCount, 
-  particleColor, 
-  isAggregated, 
+  container,
+  particleCount,
+  particleColor,
+  isAggregated,
   detectGesture,
-  opennessScale
+  opennessScale,
+  fingerCount,
+  letterMode
 );
 
 // --- Custom Image Handler ---
@@ -87,6 +92,11 @@ onMounted(async () => {
   <div class="ui-panel">
     <h1>3D 手势粒子交互</h1>
     <div class="status">{{ trackingStatus }}</div>
+    <div class="letter-indicator" v-if="letterMode">
+      <span class="letter-badge" :class="'letter-' + letterMode">
+        变形为字母 {{ letterMode }}
+      </span>
+    </div>
     
     <div class="controls">
       <div class="control-group">

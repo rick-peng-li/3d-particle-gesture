@@ -44,8 +44,46 @@ h1 {
 .status {
   font-size: 0.9rem;
   color: #00ff88;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   font-family: monospace;
+}
+
+.letter-indicator {
+  margin-bottom: 15px;
+}
+
+.letter-badge {
+  display: inline-block;
+  padding: 8px 18px;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: bold;
+  animation: pulse 1.5s ease-in-out infinite;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.letter-A {
+  background: linear-gradient(135deg, #ff6b6b, #ee5a5a);
+  color: white;
+  box-shadow: 0 0 20px rgba(255, 107, 107, 0.5);
+}
+
+.letter-B {
+  background: linear-gradient(135deg, #4ecdc4, #44a08d);
+  color: white;
+  box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+}
+
+.letter-C {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.9; }
 }
 
 .control-group {
