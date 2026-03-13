@@ -1,11 +1,16 @@
-import { onMounted, onBeforeUnmount, watch } from 'vue';
+import { onMounted, onBeforeUnmount, watch, ref } from 'vue';
 import * as THREE from 'three';
 import { shapeGenerators, getImagePoints, getImageContourPoints } from '../utils/shapeGenerators';
 
-export function useThreeParticles(container, particleCount, particleColor, isAggregated, onFrame, opennessScaleRef) {
+export function useThreeParticles(container, particleCount, particleColor, isAggregated, onFrame, opennessScaleRef, fingerCountRef, letterModeRef) {
   let scene, camera, renderer, particles;
   let targetPositions = [];
   let animationId;
+  
+  // 当前形状状态
+  const currentShapeName = ref('heart');
+  const currentCustomData = ref(null);
+  const userSelectedShape = ref('heart'); // 用户选择的原始形状
   
   // Initialize Three.js
   function initThree() {
@@ -46,11 +51,47 @@ export function useThreeParticles(container, particleCount, particleColor, isAgg
 
   // Update target positions based on shape name or custom image data
   function updateTargetShape(shapeName, customImageData = null) {
+    // 保存用户选择的形状（排除字母形状）
+    if (shapeName !== 'letterA' && shapeName !== 'letterB' && shapeName !== 'letterC') {
+      userSelectedShape.value = shapeName;
+    }
+    currentShapeName.value = shapeName;
+    currentCustomData.value = customImageData;
+    
     if (shapeName === 'custom' && customImageData) {
       // Prefer contour points for cleaner outlines
       targetPositions = getImageContourPoints(customImageData, particleCount);
     } else if (shapeGenerators[shapeName]) {
       targetPositions = shapeGenerators[shapeName](particleCount);
+    }
+  }
+  
+  // 根据字母模式更新形状
+  function updateShapeByLetterMode() {
+    if (!letterModeRef) return;
+    
+    const mode = letterModeRef.value;
+    let targetShape = userSelectedShape.value;
+    
+    // 根据字母模式切换到对应字母形状
+    if (mode === 'A') {
+      targetShape = 'letterA';
+    } else if (mode === 'B') {
+      targetShape = 'letterB';
+    } else if (mode === 'C') {
+      targetShape = 'letterC';
+    }
+    // mode === null 时保持用户选择的形状
+    
+    // 只有当形状真的改变时才更新
+    if (targetShape !== currentShapeName.value) {
+      if (targetShape === 'custom' && currentCustomData.value) {
+        targetPositions = getImageContourPoints(currentCustomData.value, particleCount);
+        currentShapeName.value = 'custom';
+      } else if (shapeGenerators[targetShape]) {
+        targetPositions = shapeGenerators[targetShape](particleCount);
+        currentShapeName.value = targetShape;
+      }
     }
   }
 
@@ -61,6 +102,9 @@ export function useThreeParticles(container, particleCount, particleColor, isAgg
     if (onFrame) onFrame();
 
     if (!particles) return;
+    
+    // 根据字母模式更新形状
+    updateShapeByLetterMode();
 
     const positions = particles.geometry.attributes.position.array;
     const speed = 0.05; // Lerp speed
@@ -149,6 +193,7 @@ export function useThreeParticles(container, particleCount, particleColor, isAgg
   return {
     initThree,
     animate,
-    updateTargetShape
+    updateTargetShape,
+    currentShapeName
   };
 }

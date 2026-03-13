@@ -344,10 +344,117 @@ export function getMaitreyaPoints(count) {
   }
   return points;
 }
+// 字母A的粒子形状
+export function getLetterAPoints(count) {
+  const points = [];
+  const scale = 1.2;
+  
+  // A的组成：两条斜边 + 一条横杠
+  const leftLeg = Math.floor(count * 0.4);
+  const rightLeg = Math.floor(count * 0.4);
+  const crossBar = count - leftLeg - rightLeg;
+  
+  // 左斜边 (从左上到左下)
+  for (let i = 0; i < leftLeg; i++) {
+    const t = i / leftLeg;
+    const x = -15 * scale + t * 8 * scale;
+    const y = 20 * scale - t * 40 * scale;
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x + (Math.random() - 0.5) * 2, y, z);
+  }
+  
+  // 右斜边 (从右上到右下)
+  for (let i = 0; i < rightLeg; i++) {
+    const t = i / rightLeg;
+    const x = 15 * scale - t * 8 * scale;
+    const y = 20 * scale - t * 40 * scale;
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x + (Math.random() - 0.5) * 2, y, z);
+  }
+  
+  // 横杠
+  for (let i = 0; i < crossBar; i++) {
+    const t = i / crossBar;
+    const x = (t - 0.5) * 16 * scale;
+    const y = 2 * scale;
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x, y + (Math.random() - 0.5) * 2, z);
+  }
+  
+  return points;
+}
+
+// 字母B的粒子形状
+export function getLetterBPoints(count) {
+  const points = [];
+  const scale = 1.2;
+  
+  // B的组成：一条竖线 + 两个半圆
+  const verticalCount = Math.floor(count * 0.3);
+  const topLoopCount = Math.floor(count * 0.35);
+  const bottomLoopCount = count - verticalCount - topLoopCount;
+  
+  // 竖线
+  for (let i = 0; i < verticalCount; i++) {
+    const t = i / verticalCount;
+    const x = -10 * scale;
+    const y = 20 * scale - t * 40 * scale;
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x + (Math.random() - 0.5) * 2, y, z);
+  }
+  
+  // 上半圆
+  for (let i = 0; i < topLoopCount; i++) {
+    const t = i / topLoopCount;
+    const angle = Math.PI / 2 + t * Math.PI; // 从左到右的半圆
+    const r = 10 * scale;
+    const x = -10 * scale + r * Math.cos(angle) * 0.8;
+    const y = 10 * scale + r * Math.sin(angle) * 0.8;
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x, y, z);
+  }
+  
+  // 下半圆
+  for (let i = 0; i < bottomLoopCount; i++) {
+    const t = i / bottomLoopCount;
+    const angle = Math.PI / 2 + t * Math.PI;
+    const r = 10 * scale;
+    const x = -10 * scale + r * Math.cos(angle) * 0.8;
+    const y = -10 * scale + r * Math.sin(angle) * 0.8;
+    const z = (Math.random() - 0.5) * 3;
+    points.push(x, y, z);
+  }
+  
+  return points;
+}
+
+// 字母C的粒子形状
+export function getLetterCPoints(count) {
+  const points = [];
+  const scale = 1.2;
+  
+  // C是一个不完整的圆（右侧开口）
+  for (let i = 0; i < count; i++) {
+    const t = i / count;
+    // 从左上开始，顺时针到左下，跳过右侧
+    const angle = Math.PI * 0.8 + t * Math.PI * 1.4; // 从144度到396度，跳过右侧
+    const r = 18 * scale;
+    const x = r * Math.cos(angle);
+    const y = r * Math.sin(angle) * 0.6; // 压扁一点
+    const z = (Math.random() - 0.5) * 4;
+    points.push(x, y, z);
+  }
+  
+  return points;
+}
+
 export const shapeGenerators = {
   heart: getHeartPoints,
   flower: getFlowerPoints,
   saturn: getSaturnPoints,
   buddha: getBuddhaPoints,
   firework: getFireworkPoints,
+  letterA: getLetterAPoints,
+  letterB: getLetterBPoints,
+  letterC: getLetterCPoints,
 };

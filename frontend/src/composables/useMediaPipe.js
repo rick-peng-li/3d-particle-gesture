@@ -7,6 +7,8 @@ export function useMediaPipe() {
   const trackingStatus = ref('正在初始化...');
   const isAggregated = ref(true);
   const opennessScale = ref(0.0); // Default to 0 (fully aggregated)
+  const fingerCount = ref(0); // 伸出的手指数量 (0-5)
+  const letterMode = ref(null); // null = 正常模式, 'A'/'B'/'C' = 字母模式
   let handLandmarker = null;
   let lastVideoTime = -1;
 
@@ -105,6 +107,71 @@ export function useMediaPipe() {
             }
           }
 
+          // 计算伸出的手指数量
+          let maxExtendedCount = 0;
+          for (const landmarks of results.landmarks) {
+            const wrist = landmarks[0];
+            const middleFingerMCP = landmarks[9];
+            const scaleRef = Math.sqrt(
+                Math.pow(middleFingerMCP.x - wrist.x, 2) + 
+                Math.pow(middleFingerMCP.y - wrist.y, 2)
+            );
+            
+            if (scaleRef > 0) {
+              // 检查5根手指: Thumb(4), Index(8), Middle(12), Ring(16), Pinky(20)
+              // 拇指使用不同的检测逻辑
+              const fingerTips = [4, 8, 12, 16, 20];
+              const fingerPips = [2, 6, 10, 14, 18]; // 关节位置
+              let extendedCount = 0;
+              
+              // 食指到小指
+              for (let i = 1; i < 5; i++) {
+                const tip = landmarks[fingerTips[i]];
+                const pip = landmarks[fingerPips[i]];
+                const distTip = Math.sqrt(
+                    Math.pow(tip.x - wrist.x, 2) + 
+                    Math.pow(tip.y - wrist.y, 2)
+                );
+                const distPip = Math.sqrt(
+                    Math.pow(pip.x - wrist.x, 2) + 
+                    Math.pow(pip.y - wrist.y, 2)
+                );
+                
+                // 指尖比关节离手腕更远，说明手指伸出
+                if (distTip > distPip * 1.2) {
+                  extendedCount++;
+                }
+              }
+              
+              // 拇指检测：指尖x坐标与关节x坐标的比较（根据手的方向）
+              const thumbTip = landmarks[4];
+              const thumbIp = landmarks[3];
+              const thumbMcp = landmarks[2];
+              // 简单判断：拇指指尖远离其他手指根部
+              const thumbDist = Math.sqrt(
+                  Math.pow(thumbTip.x - wrist.x, 2) + 
+                  Math.pow(thumbTip.y - wrist.y, 2)
+              );
+              if (thumbDist > scaleRef * 1.1) {
+                extendedCount++;
+              }
+              
+              if (extendedCount > maxExtendedCount) {
+                maxExtendedCount = extendedCount;
+              }
+            }
+          }
+          
+          // 更新手指数量
+          fingerCount.value = maxExtendedCount;
+          
+          // 根据手指数量设置字母模式
+          if (maxExtendedCount >= 1 && maxExtendedCount <= 3) {
+            letterMode.value = ['A', 'B', 'C'][maxExtendedCount - 1];
+          } else {
+            letterMode.value = null;
+          }
+
           // Global State Logic:
           // Smooth mapping: no hard binary switch.
           // Map maxOpenness to both state and scale continuously.
@@ -130,12 +197,18 @@ export function useMediaPipe() {
           // 0 = Target Shape, 1 = Explosion
           // Note: isAggregated boolean is now less important for logic, mainly for UI text
           
+          // 根据手指数量更新状态文本
+          let fingerText = "";
+          if (maxExtendedCount === 1) fingerText = " - 变形为字母A";
+          else if (maxExtendedCount === 2) fingerText = " - 变形为字母B";
+          else if (maxExtendedCount === 3) fingerText = " - 变形为字母C";
+          
           if (maxOpenness > openThreshold) {
                isAggregated.value = false;
-               trackingStatus.value = "手掌张开 (粒子扩散)";
+               trackingStatus.value = "手掌张开 (粒子扩散)" + fingerText;
           } else {
                 isAggregated.value = true;
-                trackingStatus.value = "握拳/其他 (粒子聚合)";
+                trackingStatus.value = "握拳/其他 (粒子聚合)" + fingerText;
                 opennessScale.value = 0.0;
            }
            
@@ -153,6 +226,8 @@ export function useMediaPipe() {
            isAggregated.value = true;
            trackingStatus.value = "未检测到手势";
            opennessScale.value = 0.0;
+           fingerCount.value = 0;
+           letterMode.value = null;
        }
      }
    }
@@ -169,6 +244,8 @@ export function useMediaPipe() {
     trackingStatus,
     isAggregated,
     opennessScale,
+    fingerCount,
+    letterMode,
     initMediaPipe,
     detectGesture
   };
